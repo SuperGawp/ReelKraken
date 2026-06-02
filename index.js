@@ -1,6 +1,7 @@
 import "dotenv/config";
 import {
   ActionRowBuilder,
+  ActivityType,
   ButtonBuilder,
   ButtonStyle,
   Client,
@@ -269,9 +270,28 @@ async function handleButton(interaction) {
   });
 }
 
+function updateBotStatus() {
+  if (!client.user) return;
+
+  const serverCount = client.guilds.cache.size;
+
+  client.user.setActivity(`${serverCount} crews aboard`, {
+    type: ActivityType.Watching
+  });
+
+  console.log(`Status updated: Watching ${serverCount} crews aboard`);
+}
+
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
+
+  updateBotStatus();
+
+  setInterval(updateBotStatus, 10 * 60 * 1000);
 });
+
+client.on("guildCreate", updateBotStatus);
+client.on("guildDelete", updateBotStatus);
 
 client.on("interactionCreate", async interaction => {
   try {
